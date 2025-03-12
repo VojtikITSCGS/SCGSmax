@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Přihlášení</title>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Přihlášení</h1>
+        <p>Ještě nemáte účet? <a href="#">Zaregistrujte se</a></p>
+
+        <input type="email" id="email" placeholder="Váš e-mail">
+        <input type="password" id="password" placeholder="Heslo">
+        <a href="#" class="forgot-password">Zapomněli jste heslo?</a>
+
+        <button class="login-btn" onclick="login()">Přihlásit</button>
+        <button class="register-btn" onclick="register()">Registrovat</button>
+
+        <div class="separator">NEBO</div>
+
+        <button class="social-btn google-btn" onclick="googleLogin()">Pokračovat přes Google</button>
+
+        <h2 id="status">Nepřihlášen</h2>
+
+        <div id="generator" style="display:none;">
+            <button onclick="generateCode()">Generovat kód</button>
+            <p id="output"></p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7pZGBlVgR92Mk7BfpQmoMbx_YuBJRrVM",
+            authDomain: "scgs-c3c79.firebaseapp.com",
+            projectId: "scgs-c3c79",
+            storageBucket: "scgs-c3c79.appspot.com",
+            messagingSenderId: "1027733943044",
+            appId: "1:1027733943044:web:816e0f60172d7d69f41651"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        function login() {
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => updateUI(userCredential.user))
+                .catch(err => alert(err.message));
+        }
+
+        function register() {
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => updateUI(userCredential.user))
+                .catch(err => alert(err.message));
+        }
+
+        function googleLogin() {
+            auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+                .then(userCredential => updateUI(userCredential.user))
+                .catch(err => alert(err.message));
+        }
+
+        function logout() {
+            auth.signOut().then(() => updateUI(null));
+        }
+
+        auth.onAuthStateChanged(user => updateUI(user));
+
+        function updateUI(user) {
+            let status = document.getElementById("status");
+            let generator = document.getElementById("generator");
+
+            if (user) {
+                status.textContent = "Přihlášen jako: " + user.email;
+                generator.style.display = "block";
+            } else {
+                status.textContent = "Nepřihlášen";
+                generator.style.display = "none";
+            }
+        }
+
+        function generateCode() {
+            let code = Math.random().toString(36).substring(2, 10).toUpperCase();
+            document.getElementById("output").textContent = "Vygenerovaný kód: " + code;
+        }
+    </script>
+</body>
+</html>
+
